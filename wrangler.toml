@@ -9,7 +9,6 @@ zone_name = "hzhou.dev"
 custom_domain = true
 
 [[d1_databases]]
-name = "hello-db"
+database_name = "hello-db"
 binding = "DATABASE"
 database_id = "0f6c2d54-7074-4577-9e17-0632b2622fb8"
-
