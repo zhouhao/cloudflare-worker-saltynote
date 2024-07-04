@@ -1,0 +1,8 @@
+name = "hello"
+main = "src/index.js"
+compatibility_date = "2023-08-23"
+
+[[d1_databases]]
+name = "hello-db"
+binding = "DATABASE"
+database_id = "0f6c2d54-7074-4577-9e17-0632b2622fb8"

@@ -1,0 +1,15 @@
+name = "hello"
+main = "src/src/index.js"
+compatibility_date = "2023-08-23"
+workers_dev = true
+
+[[routes]]
+pattern = "api.cf.hzhou.dev"
+zone_name = "hzhou.dev"
+custom_domain = true
+
+[unsafe]
+  [[unsafe.bindings]]
+  database_id = "0f6c2d54-7074-4577-9e17-0632b2622fb8"
+  name = "DATABASE"
+  type = "d1"
