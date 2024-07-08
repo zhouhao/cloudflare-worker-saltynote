@@ -1,7 +1,0 @@
-{
-  "databaseURL": "https://Hao-Zhou-s-workspace-v9h4v0.us-west-2.xata.sh/db/hzhou",
-  "codegen": {
-    "output": "src/xata.js",
-    "moduleType": "esm"
-  }
-}
