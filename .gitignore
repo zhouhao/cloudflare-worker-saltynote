@@ -115,9 +115,6 @@ out
 .nuxt
 dist
 
-# Gatsby files
-
-.cache/
 
 # Comment in the public line in if your project uses Gatsby and not Next.js
 
@@ -132,7 +129,6 @@ dist
 # vuepress v2.x temp and cache directory
 
 .temp
-.cache
 
 # Docusaurus cache and generated files
 
@@ -170,3 +166,5 @@ dist
 
 .dev.vars
 .wrangler/
+.idea
+

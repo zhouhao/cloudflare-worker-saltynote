@@ -11,6 +11,6 @@
     "wrangler": "^3.60.3"
   },
   "dependencies": {
-    "fastify-edge": "^0.0.4"
+    "hono": "^4.4.13"
   }
 }
