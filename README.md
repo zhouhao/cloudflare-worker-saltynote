@@ -15,4 +15,4 @@ New Backend to replace: https://github.com/SaltyNote/saltynote-service-kotlin, a
 - [ ] Enable page annotation query by user
 - [ ] Enable page annotation query by user and url
 - [ ] Enable page annotation deletion
-- [ ] Enable page annotation update
+- [X] Enable page annotation update
