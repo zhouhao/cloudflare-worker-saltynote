@@ -5,10 +5,9 @@ import { generateCode, generateTokenPair, getUserId, handleNull } from './utils/
 import { kvGet, saveEmailVerifyCode } from './persist/kv-store';
 import {
   createAnnotation,
-  createComment,
   fetchOrCreateUserByEmail,
   getAnnotationById,
-  saveRefreshToken
+  saveRefreshToken, updateAnnotationById
 } from './persist/db';
 import isEmail from 'validator/es/lib/isEmail';
 
@@ -60,7 +59,7 @@ app.get('/v1/auth/page', (c) => {
   return c.json(payload); // eg: { "sub": "1234567890", "name": "John Doe", "iat": 1516239022 }
 });
 
-// 1. get annotation by id
+// 1. create new annotation
 app.post('/v1/annotation', async (c) => {
   const annotation = await c.req.json();
   if (!annotation.url || (!annotation.selected_text && !annotation.note)) {
@@ -78,6 +77,14 @@ app.get('/v1/annotation/:id', async (c) => {
   const id = c.req.param('id');
   const userId = getUserId(c);
   return c.json(handleNull(await getAnnotationById(id, userId, c.env)));
+});
+
+// 3. update annotation by id
+app.put('/v1/annotation/:id', async (c) => {
+  const id = c.req.param('id');
+  const annotation = await c.req.json();
+  const userId = getUserId(c);
+  return c.json(handleNull(await updateAnnotationById(id, userId, annotation, c.env)));
 });
 
 

@@ -1,5 +1,3 @@
-import { generateCode } from '../utils/base';
-
 export const saveRefreshToken = async (token, user, env) => {
   const { success } = await env.DATABASE.prepare(`
     insert into refresh_token (token, user_id, created_at, expire_at) values (?, ?, ?, ?)
@@ -39,7 +37,7 @@ export const deleteAnnotationById = async (id, user_id, env) => {
 export const updateAnnotationById = async (id, user_id, annotation, env) => {
   const originalAnnotation = await getAnnotationById(id, user_id, env);
   if (!originalAnnotation) {
-    return false;
+    return {};
   }
 
   const highlightColor = annotation.highlight_color || originalAnnotation.highlight_color;
@@ -56,7 +54,7 @@ export const updateAnnotationById = async (id, user_id, annotation, env) => {
     tags = ?
   where id = ? and user_id = ?`).bind(highlightColor, selectedText, note, url, tags, id, user_id).run();
 
-  return success;
+  return success ? await getAnnotationById(id, user_id, env) : {};
 };
 
 export const createAnnotation = async (user_id, annotation, env) => {
