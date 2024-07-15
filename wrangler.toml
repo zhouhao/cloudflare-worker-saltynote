@@ -1,4 +1,4 @@
-name = "hello"
+name = "saltynote"
 main = "src/index.js"
 compatibility_date = "2023-08-23"
 workers_dev = true
@@ -12,3 +12,7 @@ custom_domain = true
 database_name = "hello-db"
 binding = "DATABASE"
 database_id = "0f6c2d54-7074-4577-9e17-0632b2622fb8"
+
+[[kv_namespaces]]
+binding = "KV"
+id = "cf62b976e0de4262b77de6dd411eff79"
