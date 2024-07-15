@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "hono": "^4.4.13",
-    "resend": "^3.4.0"
+    "resend": "^3.4.0",
+    "validator": "^13.12.0"
   }
 }
