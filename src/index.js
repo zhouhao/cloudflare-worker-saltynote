@@ -1,12 +1,22 @@
 import { Hono } from 'hono';
 import { jwt } from 'hono/jwt';
 import { sendEmail } from './handler/email';
-import { generateCode, generateTokenPair } from './utils/base';
+import { generateCode, generateTokenPair, getUserId, handleNull } from './utils/base';
 import { kvGet, saveEmailVerifyCode } from './persist/kv-store';
-import { fetchOrCreateUserByEmail, saveRefreshToken } from './persist/db';
+import {
+  createAnnotation,
+  createComment,
+  fetchOrCreateUserByEmail,
+  getAnnotationById,
+  saveRefreshToken
+} from './persist/db';
 import isEmail from 'validator/es/lib/isEmail';
 
 const app = new Hono();
+
+app.get('/', async c => {
+  return c.json({ 'message': `hello world` });
+});
 
 // ---- User API ----
 
@@ -23,7 +33,6 @@ app.post('/email', async c => {
 });
 
 // 2. login with email verify code
-
 app.post('/login', async c => {
   const { email, token } = await c.req.json();
   if (isEmail(email) && await kvGet(c.env.KV, email) === token) {
@@ -37,13 +46,7 @@ app.post('/login', async c => {
 });
 
 
-// ---- Page Annotation API ----
-
-
-app.get('/', async c => {
-  return c.json({ 'message': `hello world` });
-});
-
+// ---- Page Annotation API, auth is needed ----
 app.use('/v1/*', (c, next) => {
   const jwtMiddleware = jwt({
     secret: c.env.JWT_ACCESS_SECRET
@@ -51,14 +54,35 @@ app.use('/v1/*', (c, next) => {
   return jwtMiddleware(c, next);
 });
 
+// 0. test whether auth info can be returned correctly
 app.get('/v1/auth/page', (c) => {
   const payload = c.get('jwtPayload');
   return c.json(payload); // eg: { "sub": "1234567890", "name": "John Doe", "iat": 1516239022 }
 });
 
+// 1. get annotation by id
+app.post('/v1/annotation', async (c) => {
+  const annotation = await c.req.json();
+  if (!annotation.url || (!annotation.selected_text && !annotation.note)) {
+    return c.json({ 'error': `Invalid page annotation payload` }, 400);
+  }
+  const userId = getUserId(c);
 
+  const pageAnnotation = await createAnnotation(userId, annotation, c.env);
+  return c.json(pageAnnotation); // eg: { "sub": "1234567890", "name": "John Doe", "iat": 1516239022 }
+});
+
+
+// 2. get annotation by id
+app.get('/v1/annotation/:id', async (c) => {
+  const id = c.req.param('id');
+  const userId = getUserId(c);
+  return c.json(handleNull(await getAnnotationById(id, userId, c.env)));
+});
+
+
+// ---- Error Handling ----
 app.onError((err, c) => {
-  console.error(`${err}`);
   return c.json({ 'error': `${err.message}` }, err.status);
 });
 

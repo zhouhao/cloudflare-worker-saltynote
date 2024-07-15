@@ -21,3 +21,14 @@ export const generateTokenPair = async (user, env) => {
     }, env.JWT_REFRESH_SECRET)
   };
 };
+
+
+export const getUserId = context => {
+  const payload = context.get('jwtPayload');
+  return payload.sub;
+};
+
+
+export const handleNull = resp => {
+  return resp || {};
+};
