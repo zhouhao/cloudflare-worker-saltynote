@@ -1,6 +1,6 @@
 {
-  "name": "hello",
-  "version": "0.0.0",
+  "name": "saltynote-cloudflare-worker",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
