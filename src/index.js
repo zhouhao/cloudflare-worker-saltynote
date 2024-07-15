@@ -5,9 +5,11 @@ import { generateCode, generateTokenPair, getUserId, handleNull } from './utils/
 import { kvGet, saveEmailVerifyCode } from './persist/kv-store';
 import {
   createAnnotation,
+  deleteAnnotationById,
   fetchOrCreateUserByEmail,
   getAnnotationById,
-  saveRefreshToken, updateAnnotationById
+  saveRefreshToken,
+  updateAnnotationById
 } from './persist/db';
 import isEmail from 'validator/es/lib/isEmail';
 
@@ -85,6 +87,14 @@ app.put('/v1/annotation/:id', async (c) => {
   const annotation = await c.req.json();
   const userId = getUserId(c);
   return c.json(handleNull(await updateAnnotationById(id, userId, annotation, c.env)));
+});
+
+// 4. delete annotation by id
+app.delete('/v1/annotation/:id', async (c) => {
+  const id = c.req.param('id');
+  const userId = getUserId(c);
+  const success = await deleteAnnotationById(id, userId, c.env);
+  return c.json({ success: success });
 });
 
 

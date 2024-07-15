@@ -29,6 +29,7 @@ export const getAnnotationById = async (id, user_id, env) => {
 };
 
 
+// TODO: check the effected row count
 export const deleteAnnotationById = async (id, user_id, env) => {
   const { success } = await env.DATABASE.prepare(`delete from page_annotation where id = ? and user_id = ?`).bind(id, user_id).run();
   return success;
