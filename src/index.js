@@ -13,9 +13,9 @@ const app = new Hono();
 app.post('/email', async c => {
   const { email } = await c.req.json();
   const verifyCode = generateCode(8);
-  await saveEmailVerifyCode(c.env.saltynote, email, verifyCode);
-  await sendEmail(email, generateCode(8), c.env.RESEND_API_KEY);
-  return c.json({ 'message': await kvGet(c.env.KV, 'hello') + 'Email verification code has been sent.' + await kvGet(c.env.KV, email) });
+  await saveEmailVerifyCode(c.env.KV, email, verifyCode);
+  await sendEmail(email, verifyCode, c.env.RESEND_API_KEY);
+  return c.json({ 'message': 'Email verification code has been sent.' });
 });
 
 // 2. login with email verify code
