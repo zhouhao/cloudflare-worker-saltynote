@@ -8,6 +8,8 @@ import {
   deleteAnnotationById,
   fetchOrCreateUserByEmail,
   getAnnotationById,
+  getAnnotationsByUserId,
+  getAnnotationsByUserIdAndUrl,
   saveRefreshToken,
   updateAnnotationById
 } from './persist/db';
@@ -97,6 +99,18 @@ app.delete('/v1/annotation/:id', async (c) => {
   return c.json({ success: success });
 });
 
+// 5. get all annotation for current user
+app.get('/v1/annotations', async (c) => {
+  const userId = getUserId(c);
+  return c.json(handleNull(await getAnnotationsByUserId(userId, c.env)));
+});
+
+// 6. get all annotation for current user and given url
+app.post('/v1/annotations', async (c) => {
+  const userId = getUserId(c);
+  const { url } = await c.req.json();
+  return c.json(handleNull(await getAnnotationsByUserIdAndUrl(userId, url, c.env)));
+});
 
 // ---- Error Handling ----
 app.onError((err, c) => {

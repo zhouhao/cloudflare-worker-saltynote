@@ -28,6 +28,16 @@ export const getAnnotationById = async (id, user_id, env) => {
   return await env.DATABASE.prepare(`select * from page_annotation where id = ? and user_id = ?`).bind(id, user_id).first();
 };
 
+export const getAnnotationsByUserId = async (user_id, env) => {
+  const { results } = await env.DATABASE.prepare(`select * from page_annotation where user_id = ?`).bind(user_id).all();
+  return results;
+};
+
+export const getAnnotationsByUserIdAndUrl = async (user_id, url, env) => {
+  const { results } = await env.DATABASE.prepare(`select * from page_annotation where user_id = ? and url = ?`).bind(user_id, url).all();
+  return results;
+};
+
 
 // TODO: check the effected row count
 export const deleteAnnotationById = async (id, user_id, env) => {

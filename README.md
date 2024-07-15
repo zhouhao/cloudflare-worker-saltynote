@@ -12,7 +12,7 @@ New Backend to replace: https://github.com/SaltyNote/saltynote-service-kotlin, a
 - [X] Enable basic CRUD
 - [X] Enable page annotation adding
 - [X] Enable page annotation query by id
-- [ ] Enable page annotation query by user
-- [ ] Enable page annotation query by user and url
+- [X] Enable page annotation query by user
+- [X] Enable page annotation query by user and url
 - [X] Enable page annotation deletion
 - [X] Enable page annotation update
