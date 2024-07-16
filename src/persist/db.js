@@ -36,18 +36,28 @@ export const fetchOrCreateUserByEmail = async (email, env) => {
 
 
 // ---- Page Annotation Query ----
-
+const fixTags = result => {
+  result.tags = JSON.parse(result.tags);
+  return result;
+};
 export const getAnnotationById = async (id, userId, env) => {
-  return await env.DATABASE.prepare(`select * from page_annotation where id = ? and user_id = ?`).bind(id, userId).first();
+  let result = await env.DATABASE.prepare(`select * from page_annotation where id = ? and user_id = ?`).bind(id, userId).first();
+  return fixTags(result);
 };
 
 export const getAnnotationsByUserId = async (userId, env) => {
   const { results } = await env.DATABASE.prepare(`select * from page_annotation where user_id = ?`).bind(userId).all();
+  results.forEach((annotation) => {
+    fixTags(annotation);
+  });
   return results;
 };
 
 export const getAnnotationsByUserIdAndUrl = async (userId, url, env) => {
   const { results } = await env.DATABASE.prepare(`select * from page_annotation where user_id = ? and url = ?`).bind(userId, url).all();
+  results.forEach((annotation) => {
+    fixTags(annotation);
+  });
   return results;
 };
 
