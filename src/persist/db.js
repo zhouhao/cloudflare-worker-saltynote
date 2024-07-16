@@ -1,10 +1,23 @@
-export const saveRefreshToken = async (token, user, env) => {
+export const saveRefreshToken = async (token, userId, env) => {
   const { success } = await env.DATABASE.prepare(`
     insert into refresh_token (token, user_id, created_at, expire_at) values (?, ?, ?, ?)
-  `).bind(token, user.id, Date.now(), Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 90).run();
+  `).bind(token, userId, Date.now(), Math.floor(Date.now() / 1000) + env.JWT_REFRESH_TOKEN_TTL_SEC).run();
   return success;
 };
 
+export const getLatestRefreshTokenByUserId = async (userId, env) => {
+  return await env.DATABASE.prepare(`SELECT * from refresh_token where user_id = ? order by id desc limit 1`)
+    .bind(userId).first();
+};
+
+export const getRefreshToken = async (userId, token, env) => {
+  return await env.DATABASE.prepare(`SELECT * from refresh_token where user_id = ? and token = ?`).bind(userId, token).first();
+};
+
+export const deleteRefreshTokenByUserId = async (userId, env) => {
+  const { success } = await env.DATABASE.prepare(`delete from refresh_token where user_id = ?`).bind(userId).run();
+  return success;
+};
 
 export const fetchOrCreateUserByEmail = async (email, env) => {
   let result = await env.DATABASE.prepare(`select * from user where email = ?`).bind(email).first();
@@ -24,29 +37,29 @@ export const fetchOrCreateUserByEmail = async (email, env) => {
 
 // ---- Page Annotation Query ----
 
-export const getAnnotationById = async (id, user_id, env) => {
-  return await env.DATABASE.prepare(`select * from page_annotation where id = ? and user_id = ?`).bind(id, user_id).first();
+export const getAnnotationById = async (id, userId, env) => {
+  return await env.DATABASE.prepare(`select * from page_annotation where id = ? and user_id = ?`).bind(id, userId).first();
 };
 
-export const getAnnotationsByUserId = async (user_id, env) => {
-  const { results } = await env.DATABASE.prepare(`select * from page_annotation where user_id = ?`).bind(user_id).all();
+export const getAnnotationsByUserId = async (userId, env) => {
+  const { results } = await env.DATABASE.prepare(`select * from page_annotation where user_id = ?`).bind(userId).all();
   return results;
 };
 
-export const getAnnotationsByUserIdAndUrl = async (user_id, url, env) => {
-  const { results } = await env.DATABASE.prepare(`select * from page_annotation where user_id = ? and url = ?`).bind(user_id, url).all();
+export const getAnnotationsByUserIdAndUrl = async (userId, url, env) => {
+  const { results } = await env.DATABASE.prepare(`select * from page_annotation where user_id = ? and url = ?`).bind(userId, url).all();
   return results;
 };
 
 
 // TODO: check the effected row count
-export const deleteAnnotationById = async (id, user_id, env) => {
-  const { success } = await env.DATABASE.prepare(`delete from page_annotation where id = ? and user_id = ?`).bind(id, user_id).run();
+export const deleteAnnotationById = async (id, userId, env) => {
+  const { success } = await env.DATABASE.prepare(`delete from page_annotation where id = ? and user_id = ?`).bind(id, userId).run();
   return success;
 };
 
-export const updateAnnotationById = async (id, user_id, annotation, env) => {
-  const originalAnnotation = await getAnnotationById(id, user_id, env);
+export const updateAnnotationById = async (id, userId, annotation, env) => {
+  const originalAnnotation = await getAnnotationById(id, userId, env);
   if (!originalAnnotation) {
     return {};
   }
@@ -63,12 +76,12 @@ export const updateAnnotationById = async (id, user_id, annotation, env) => {
     note = ?,
     url = ?,
     tags = ?
-  where id = ? and user_id = ?`).bind(highlightColor, selectedText, note, url, tags, id, user_id).run();
+  where id = ? and user_id = ?`).bind(highlightColor, selectedText, note, url, tags, id, userId).run();
 
-  return success ? await getAnnotationById(id, user_id, env) : {};
+  return success ? await getAnnotationById(id, userId, env) : {};
 };
 
-export const createAnnotation = async (user_id, annotation, env) => {
+export const createAnnotation = async (userId, annotation, env) => {
   const highlightColor = annotation.highlight_color || '#ffff00';
   const selectedText = annotation.selected_text;
   const note = annotation.note;
@@ -80,11 +93,11 @@ export const createAnnotation = async (user_id, annotation, env) => {
     success,
     meta
   } = await env.DATABASE.prepare(`insert into page_annotation (user_id, highlight_color, selected_text, note, url, tags, is_page_only, created_at) values (?, ?, ?, ?, ?, ?, ?, ?)`)
-    .bind(user_id, highlightColor, selectedText, note, url, tags, isPageOnly, Date.now()).run();
+    .bind(userId, highlightColor, selectedText, note, url, tags, isPageOnly, Date.now()).run();
 
   if (success) {
     const id = meta.last_row_id;
-    return await getAnnotationById(id, user_id, env);
+    return await getAnnotationById(id, userId, env);
   }
   return null;
 };

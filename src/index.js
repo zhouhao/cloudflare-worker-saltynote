@@ -1,15 +1,17 @@
 import { Hono } from 'hono';
-import { jwt } from 'hono/jwt';
+import { jwt, verify } from 'hono/jwt';
 import { sendEmail } from './handler/email';
 import { generateCode, generateTokenPair, getUserId, handleNull } from './utils/base';
 import { kvGet, saveEmailVerifyCode } from './persist/kv-store';
 import {
   createAnnotation,
   deleteAnnotationById,
+  deleteRefreshTokenByUserId,
   fetchOrCreateUserByEmail,
   getAnnotationById,
   getAnnotationsByUserId,
-  getAnnotationsByUserIdAndUrl,
+  getAnnotationsByUserIdAndUrl, getLatestRefreshTokenByUserId,
+  getRefreshToken,
   saveRefreshToken,
   updateAnnotationById
 } from './persist/db';
@@ -40,11 +42,35 @@ app.post('/login', async c => {
   const { email, token } = await c.req.json();
   if (isEmail(email) && await kvGet(c.env.KV, email) === token) {
     const user = await fetchOrCreateUserByEmail(email, c.env);
-    const tokenPair = await generateTokenPair(user, c.env);
-    await saveRefreshToken(tokenPair.refresh_token, user, c.env);
+    const refreshToken = await getLatestRefreshTokenByUserId(user.id, c.env);
+    const tokenPair = await generateTokenPair(user.id, c.env, refreshToken ? refreshToken.token : null);
+    await saveRefreshToken(tokenPair.refresh_token, user.id, c.env);
     return c.json(tokenPair);
   } else {
     return c.json({ 'error': `Invalid email or verification code` }, 400);
+  }
+});
+
+// 3. refresh token pair
+app.post('/refresh_token', async c => {
+  const { refresh_token } = await c.req.json();
+  try {
+    const decodedPayload = await verify(refresh_token, c.env.JWT_REFRESH_SECRET);
+    const userId = decodedPayload.sub;
+    // check refresh token has not been revoked
+    const query = await getRefreshToken(userId, refresh_token, c.env);
+    if (!query) {
+      return c.json({ 'error': `Invalid refresh token` }, 400);
+    }
+
+    // check whether refresh token can be reused
+    const tokenPair = await generateTokenPair(userId, c.env, refresh_token);
+    if (tokenPair.refresh_token !== refresh_token) {
+      await saveRefreshToken(tokenPair.refresh_token, userId, c.env);
+    }
+    return c.json(tokenPair);
+  } catch (e) {
+    return c.json({ 'error': `Invalid refresh token` }, 400);
   }
 });
 
@@ -110,6 +136,13 @@ app.post('/v1/annotations', async (c) => {
   const userId = getUserId(c);
   const { url } = await c.req.json();
   return c.json(handleNull(await getAnnotationsByUserIdAndUrl(userId, url, c.env)));
+});
+
+// 7. delete all refresh token
+app.delete('/v1/refresh_tokens', async (c) => {
+  const userId = getUserId(c);
+  const success = await deleteRefreshTokenByUserId(userId, c.env);
+  return c.json({ success: success });
 });
 
 // ---- Error Handling ----
