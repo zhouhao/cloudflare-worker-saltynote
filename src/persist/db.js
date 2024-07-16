@@ -96,7 +96,7 @@ export const createAnnotation = async (userId, annotation, env) => {
   const selectedText = annotation.selected_text;
   const note = annotation.note;
   const url = annotation.url;
-  const tags = annotation.tags || '[]';
+  const tags = annotation.tags? JSON.stringify(annotation.tags) : '[]';
   const isPageOnly = annotation.is_page_only || false;
 
   const {
