@@ -19,7 +19,7 @@ export const generateTokenPair = async (userId, env, refreshToken = null) => {
     }, env.JWT_ACCESS_SECRET),
     'refresh_token': rToken || await sign({
       sub: userId,
-      exp: Math.floor(Date.now() / 1000) + env.JWT_REFRESH_TOKEN_TTL_SEC // so far 90 days
+      exp: Math.floor(Date.now() / 1000) + parseInt(env.JWT_REFRESH_TOKEN_TTL_SEC) // so far 90 days
     }, env.JWT_REFRESH_SECRET)
   };
 };
@@ -39,7 +39,7 @@ export const isRefreshTokenReusable = async (token, env) => {
   if (!token) return false;
   try {
     const decodedPayload = await verify(token, env.JWT_REFRESH_SECRET);
-    return decodedPayload.exp > Math.floor(Date.now() / 1000) + env.JWT_REFRESH_TOKEN_TTL_SEC / 2; // 45 days, half life
+    return decodedPayload.exp > Math.floor(Date.now() / 1000) + parseInt(env.JWT_REFRESH_TOKEN_TTL_SEC) / 2; // 45 days, half life
   } catch (e) {
     return false;
   }
