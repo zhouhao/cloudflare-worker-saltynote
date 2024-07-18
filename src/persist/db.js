@@ -80,7 +80,7 @@ export const updateAnnotationById = async (id, userId, annotation, env) => {
   const selectedText = annotation.selected_text || originalAnnotation.selected_text;
   const note = annotation.note || originalAnnotation.note;
   const url = annotation.url || originalAnnotation.url;
-  const tags = annotation.tags || originalAnnotation.tags;
+  const tags = annotation.tags ? JSON.stringify(annotation.tags) : originalAnnotation.tags;
 
   const { success } = await env.DATABASE.prepare(`update page_annotation set
     highlight_color = ?,
