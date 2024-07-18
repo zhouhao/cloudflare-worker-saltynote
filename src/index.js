@@ -83,12 +83,6 @@ app.use('/v1/*', (c, next) => {
   return jwtMiddleware(c, next);
 });
 
-// 0. test whether auth info can be returned correctly
-app.get('/v1/auth/page', (c) => {
-  const payload = c.get('jwtPayload');
-  return c.json(payload); // eg: { "sub": "1234567890", "name": "John Doe", "iat": 1516239022 }
-});
-
 // 1. create new annotation
 app.post('/v1/annotation', async (c) => {
   const annotation = await c.req.json();
